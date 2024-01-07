@@ -1,0 +1,11 @@
+{
+    "required": true,
+    "package": "net.replaceitem.scarpetwebserver.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "mixins": [
+        "ServiceAccessor"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

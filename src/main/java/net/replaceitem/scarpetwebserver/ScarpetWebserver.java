@@ -13,24 +13,35 @@ import net.replaceitem.scarpetwebserver.script.WebserverValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import spark.Response;
-import spark.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScarpetWebserver implements CarpetExtension, ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("scarpet-webserver");
+    
+    public static Config config;
+    public static Map<String, Webserver> webservers = new HashMap<>();
+    
     @Override
     public void onInitialize() {
+        config = Config.load();
+        for (Config.WebserverConfig webserverConfig : config.webservers) {
+            if(webserverConfig.port < 0) continue;
+            webservers.put(webserverConfig.id, new Webserver(webserverConfig));
+        }
         CarpetServer.manageExtension(this);
         LOGGER.info("scarpet-webserver loaded");
     }
 
     @Override
     public void onGameStarted() {
-        AnnotationParser.parseFunctionClass(Functions.class);
         ValueCaster.register(WebserverValue.class, "webserver");
         ValueCaster.register(ResponseValue.class, "webserver_response");
-        SimpleTypeConverter.registerType(WebserverValue.class, Service.class, WebserverValue::getService, "webserver");
+        SimpleTypeConverter.registerType(WebserverValue.class, Webserver.class, WebserverValue::getWebserver, "webserver");
         SimpleTypeConverter.registerType(ResponseValue.class, Response.class, ResponseValue::getResponse, "webserver_response");
-        OutputConverter.register(Service.class, WebserverValue::new);
+        OutputConverter.register(Webserver.class, WebserverValue::new);
         OutputConverter.register(Response.class, ResponseValue::new);
+        AnnotationParser.parseFunctionClass(Functions.class);
     }
 }

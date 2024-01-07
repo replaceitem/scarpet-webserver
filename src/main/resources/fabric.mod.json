@@ -18,6 +18,9 @@
             "net.replaceitem.scarpetwebserver.ScarpetWebserver"
         ]
     },
+    "mixins": [
+        "scarpet-webserver.mixins.json"
+    ],
     "depends": {
         "fabricloader": "*",
         "minecraft": "*",

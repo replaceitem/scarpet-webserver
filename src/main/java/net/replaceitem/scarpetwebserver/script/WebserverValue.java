@@ -3,23 +3,29 @@ package net.replaceitem.scarpetwebserver.script;
 import carpet.script.value.Value;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
+import net.replaceitem.scarpetwebserver.Webserver;
 import org.jetbrains.annotations.NotNull;
-import spark.Service;
 
 public class WebserverValue extends Value {
 
-    private final Service service;
+    private final Webserver webserver;
 
-    public WebserverValue(Service service) {
-        this.service = service;
+    public WebserverValue(Webserver webserver) {
+        this.webserver = webserver;
     }
 
-    public WebserverValue() {
-        this.service = Service.ignite();
+    public Webserver getWebserver() {
+        return webserver;
     }
 
-    public Service getService() {
-        return service;
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof WebserverValue webserverValue && webserverValue.webserver.getId().equals(this.webserver.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return webserver.hashCode();
     }
 
     @Override
@@ -30,7 +36,7 @@ public class WebserverValue extends Value {
 
     @Override
     public @NotNull String getString() {
-        return "webserver(" + this.service.port() + ")";
+        return "webserver(" + this.webserver.getId() + ")";
     }
 
     @Override

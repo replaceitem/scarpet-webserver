@@ -11,10 +11,13 @@ import carpet.script.value.StringValue;
 import carpet.script.value.Value;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
+import net.replaceitem.scarpetwebserver.script.ResponseValue;
+import spark.CustomErrorPages;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,37 +26,37 @@ import java.util.function.Function;
 import static carpet.CarpetServer.scriptServer;
 
 public class ScarpetRoute implements Route {
-
+    private final Webserver webserver;
     private final String hostname;
     private final FunctionValue callback;
 
-    public ScarpetRoute(String hostname, FunctionValue callback) {
+    public ScarpetRoute(Webserver webserver, String hostname, FunctionValue callback) {
+        this.webserver = webserver;
         this.hostname = hostname;
         this.callback = callback;
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
-        runCallback(request, response);
-        return null;
+    public Object handle(Request request, Response response) {
+        try {
+            return runCallback(request, response);
+        } catch (Exception e) {
+            ScarpetWebserver.LOGGER.error("Got exception when running webserver route callback on " + request.url(), e);
+            response.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return CustomErrorPages.INTERNAL_ERROR;
+        }
     }
 
-    private void runCallback(Request request, Response response) throws CommandSyntaxException {
+    private String runCallback(Request request, Response response) throws CommandSyntaxException, IntegrityException, InvalidCallbackException {
         CarpetScriptHost appHost = scriptServer.getAppHostByName(this.hostname);
         if(appHost == null) {
-            // close server?
+            webserver.clearRoutes();
+            throw new IntegrityException("App " + this.hostname + " not loaded");
         }
         ServerCommandSource commandSource = appHost.scriptServer().server.getCommandSource();
         CarpetScriptHost executingHost = appHost.retrieveOwnForExecution(commandSource);
-        List<Value> args = List.of(encodeRequestData(request), );
-        try
-        {
-            executingHost.callUDF(commandSource, callback, args);
-        }
-        catch (NullPointerException | InvalidCallbackException | IntegrityException error)
-        {
-            ScarpetWebserver.LOGGER.error("Got exception when running webserver route callback on " + request.url(), error);
-        }
+        List<Value> args = List.of(encodeRequestData(request), new ResponseValue(response));
+        return executingHost.callUDF(commandSource, callback, args).getString();
     }
 
     private static MapValue encodeRequestData(Request request) {
