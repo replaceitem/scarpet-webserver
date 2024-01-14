@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>scarpet-webserver demo</title>
+        <style>
+            body {
+                font-family: helvetica, sans-serif;
+            }
+            .player-list {
+                width: fit-content;
+            }
+            .player-container {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                border-radius: 16px;
+                background-color: lightgray;
+                margin-bottom: 10px;
+            }
+            .player-icon {
+                height: 64px;
+                padding: 0.1em;
+            }
+            .player-name {
+                font-size: 1.6em;
+                vertical-align: center;
+                padding-right: 0.4em;
+                padding-left: 0.1em;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>scarpet-webserver demo</h1>
+        <h2>Active players</h2>
+        <div class="player-list">
+            $PLAYERS$
+        </div>
+    </body>
+</html>
