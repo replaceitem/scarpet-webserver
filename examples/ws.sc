@@ -5,7 +5,6 @@ __config() -> {
 global_root_page = join('\n',read_file('index.html','any'));
 global_player_element = join('\n',read_file('player.html','any'));
 
-
 populateTemplate(html, replacementMap) -> (
     for(keys(replacementMap),
         html = replace(html, '\\$' + _ + '\\$', replacementMap:_);
@@ -15,16 +14,14 @@ populateTemplate(html, replacementMap) -> (
 
 
 on_root(request, response) -> (
-    logger(global_player_element);
-    logger(map(player('all'), populate_player_html(_)));
-    populate(global_root_page, {
+    populateTemplate(global_root_page, {
         'PLAYERS' -> join('\n',map(player('all'), populate_player_html(_)))
     })
 );
 
 
 populate_player_html(player) -> (
-    populate(global_player_element, {
+    populateTemplate(global_player_element, {
         'UUID' -> player~'uuid',
         'PLAYERNAME' -> player
     });
