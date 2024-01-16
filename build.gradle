@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '1.2-SNAPSHOT'
     id 'maven-publish'
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 version = project.mod_version
@@ -70,6 +71,28 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }
+}
+
+
+import com.modrinth.minotaur.dependencies.ModDependency
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "1BG4YFps"
+    versionNumber = project.mod_version
+    versionType = "beta"
+    uploadFile = remapJar
+    loaders = ["fabric"]
+    dependencies = [
+            // carpet
+            new ModDependency("TQTTVgYE" ,"required")
+    ]
+    try {
+        changelog = rootProject.file("changelog.md").text
+    } catch(FileNotFoundException ignored) { // github actions would fail otherwise
+        changelog = ""
+    }
+    syncBodyFrom = rootProject.file("MODRINTH.md").text
 }
 
 // configure the maven publication
