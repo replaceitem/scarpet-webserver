@@ -20,14 +20,21 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "carpet:fabric-carpet:${project.carpet_minecraft_version}-${project.carpet_core_version}"
     
-    implementation("com.sparkjava:spark-core:${project.spark_version}") {
-        transitive = false
+    [
+            "com.sparkjava:spark-core:${project.spark_version}",
+            "org.eclipse.jetty:jetty-server:${project.jetty_version}",
+            "org.eclipse.jetty:jetty-webapp:${project.jetty_version}",
+            "org.eclipse.jetty.websocket:websocket-server:${project.jetty_version}",
+            "org.eclipse.jetty.websocket:websocket-servlet:${project.jetty_version}",
+            "org.eclipse.jetty:jetty-util:${project.jetty_version}",
+            "org.eclipse.jetty:jetty-http:${project.jetty_version}",
+            "org.eclipse.jetty:jetty-io:${project.jetty_version}",
+            "javax.servlet:javax.servlet-api:3.1.0"
+    ].forEach {
+        dep -> include(implementation(dep)) {
+            transitive = false
+        }
     }
-
-    implementation "org.eclipse.jetty:jetty-server:${project.jetty_version}"
-    implementation "org.eclipse.jetty:jetty-webapp:${project.jetty_version}"
-    implementation "org.eclipse.jetty.websocket:websocket-server:${project.jetty_version}"
-    implementation "org.eclipse.jetty.websocket:websocket-servlet:${project.jetty_version}"
 }
 
 processResources {
