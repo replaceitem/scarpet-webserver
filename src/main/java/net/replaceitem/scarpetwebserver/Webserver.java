@@ -42,4 +42,8 @@ public class Webserver {
     public String getId() {
         return id;
     }
+
+    public void close() {
+        service.stop();
+    }
 }

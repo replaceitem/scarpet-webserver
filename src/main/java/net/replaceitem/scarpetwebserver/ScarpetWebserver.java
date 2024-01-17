@@ -7,6 +7,7 @@ import carpet.script.annotation.OutputConverter;
 import carpet.script.annotation.SimpleTypeConverter;
 import carpet.script.annotation.ValueCaster;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.server.MinecraftServer;
 import net.replaceitem.scarpetwebserver.script.Functions;
 import net.replaceitem.scarpetwebserver.script.ResponseValue;
 import net.replaceitem.scarpetwebserver.script.WebserverValue;
@@ -43,5 +44,11 @@ public class ScarpetWebserver implements CarpetExtension, ModInitializer {
         OutputConverter.register(Webserver.class, WebserverValue::new);
         OutputConverter.register(Response.class, ResponseValue::new);
         AnnotationParser.parseFunctionClass(Functions.class);
+    }
+
+    @Override
+    public void onServerClosed(MinecraftServer server) {
+        webservers.values().forEach(Webserver::close);
+        webservers.clear();
     }
 }
