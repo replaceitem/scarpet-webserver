@@ -9,6 +9,8 @@
 
 **Requires [Carpet mod](https://modrinth.com/mod/carpet)**
 
+*Warning: Only use this mod with scripts you trust or made yourself. Use at your own risk.*
+
 ## Usage
 
 This mod uses [Spark](https://sparkjava.com/) for running the webserver, and adapts most its syntax from it.
