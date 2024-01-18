@@ -29,6 +29,10 @@ public class ScarpetWebserver implements CarpetExtension, ModInitializer {
         config = Config.load();
         for (Config.WebserverConfig webserverConfig : config.webservers) {
             if(webserverConfig.port < 0) continue;
+            if(webservers.containsKey(webserverConfig.id)) {
+                LOGGER.warn("Webserver with id " + webserverConfig.id + " already exists. Remove duplicate ids in the config.");
+                continue;
+            }
             webservers.put(webserverConfig.id, new Webserver(webserverConfig));
         }
         CarpetServer.manageExtension(this);
