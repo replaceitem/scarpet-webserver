@@ -9,8 +9,6 @@
 
 **Requires [Carpet mod](https://modrinth.com/mod/carpet)**
 
-*Documentation can be found on the [Modrinth page](https://modrinth.com/mod/scarpet-webserver)*
-
 ## Usage
 
 This mod uses [Spark](https://sparkjava.com/) for running the webserver, and adapts most its syntax from it.
@@ -84,6 +82,7 @@ The callback function for routes should have this signature:
 ```js
 _(request, response) -> (
     // do stuff
+    return('html body...')
 )
 ```
 
