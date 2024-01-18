@@ -33,6 +33,15 @@ public class Functions {
         FunctionValue callbackFunction = getCallback(context.host, callback);
         webserver.addRoute(method, path, new ScarpetRoute(webserver, context.host.getName(), callbackFunction));
     }
+    
+    @ScarpetFunction
+    public void ws_not_found(Context context, Webserver webserver, Value callback) {
+        FunctionValue callbackFunction = getCallback(context.host, callback);
+        webserver.setNotFound(new ScarpetRoute(webserver, context.host.getName(), callbackFunction));
+    }
+    
+    
+    
 
     @ScarpetFunction
     public void ws_response_set_status(Response responseValue, int statusCode) {
