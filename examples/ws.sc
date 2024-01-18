@@ -2,8 +2,12 @@ __config() -> {
     'scope'->'global'
 };
 
-global_root_page = join('\n',read_file('index.html','any'));
-global_player_element = join('\n',read_file('player.html','any'));
+read_file_raw_any(file) -> join('\n',read_file(file,'any'));
+
+global_root_page = read_file_raw_any('index.html');
+global_player_element = read_file_raw_any('player.html');
+global_404_page = read_file_raw_any('404.html');
+
 
 populateTemplate(html, replacementMap) -> (
     for(keys(replacementMap),
@@ -60,3 +64,6 @@ ws_add_route(ws, 'get', '/requestdump', _(request, response) -> (
     ws_response_set_content_type(response, 'application/json');
     return(encode_json(request));
 ));
+
+// Custom 404 page
+ws_not_found(ws, _(request, response) -> global_404_page);
