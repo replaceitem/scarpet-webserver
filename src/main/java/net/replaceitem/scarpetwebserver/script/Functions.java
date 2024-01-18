@@ -23,6 +23,7 @@ public class Functions {
             ScarpetWebserver.LOGGER.warn("You are using scarpet-webserver in a player scoped app, this is not recommended");
         }
         Webserver webserver = ScarpetWebserver.webservers.get(id);
+        if(webserver == null) return null;
         webserver.init();
         return webserver;
     }
