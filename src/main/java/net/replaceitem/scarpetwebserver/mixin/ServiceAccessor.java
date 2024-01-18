@@ -7,6 +7,6 @@ import spark.route.Routes;
 
 @Mixin(Service.class)
 public interface ServiceAccessor {
-    @Accessor
+    @Accessor(remap = false)
     Routes getRoutes();
 }
