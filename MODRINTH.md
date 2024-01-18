@@ -31,7 +31,49 @@ An example config could look like this:
 ```
 
 This server can then be used in a script.
-For an example script, take a look at [the example](https://github.com/replaceitem/scarpet-webserver/tree/master/examples)
+
+### Example syntax
+
+You can take a look at the full working example with the html files [here](https://github.com/replaceitem/scarpet-webserver/tree/master/examples)
+
+```js
+// Initialize the webserver with id 'test' (Defined in the config)
+ws = ws_init('test');
+
+// Handle the root path (Callback given as a function name)
+ws_add_route(ws, 'get', '/', 'on_root');
+
+// Changing content type for an api 
+ws_add_route(ws, 'get', '/api/players', _(request, response) -> (
+    ws_response_set_content_type(response, 'application/json');
+    encode_json({'players'->player('all')});
+));
+
+// Example for redirecting /redirect to /
+ws_add_route(ws, 'get', '/redirect', _(request, response) -> (
+    ws_response_redirect(response, '/');
+));
+
+// Using route patterns to make a player parameter in the url
+ws_add_route(ws, 'get', 'api/getplayerdata/:playername', _(request, response) -> (
+    p = player(request:'params':':playername');
+    ws_response_set_content_type(response, 'application/json');
+    if(p == null,
+        ws_response_set_status(response, 400);
+        return(encode_json({'error'->'Invalid player'}));
+    );
+    return(encode_json(parse_nbt(p~'nbt')));
+));
+
+// Returns the request data directly for testing/debugging
+ws_add_route(ws, 'get', '/requestdump', _(request, response) -> (
+    ws_response_set_content_type(response, 'application/json');
+    return(encode_json(request));
+));
+
+// Custom 404 page
+ws_not_found(ws, _(request, response) -> global_404_page);
+```
 
 ### Values
 
@@ -86,12 +128,12 @@ Adds a response header.
 
 Adds a cookie to the response.
 
-`name`: String
-`value`: String
-`Path`: Optional String
-`Domain`: Optional stirng
-`maxAge`: Optional number
-`secure`: Optional boolean
-`httpOnly`: Optional boolean
+* `name`: String
+* `value`: String
+* `Path`: Optional String
+* `Domain`: Optional stirng
+* `maxAge`: Optional number
+* `secure`: Optional boolean
+* `httpOnly`: Optional boolean
 
-[More details above these parameters](https://docs.oracle.com/javaee%2F7%2Fapi%2F%2F/javax/servlet/http/Cookie.html)
+[More details about these parameters](https://docs.oracle.com/javaee%2F7%2Fapi%2F%2F/javax/servlet/http/Cookie.html)
