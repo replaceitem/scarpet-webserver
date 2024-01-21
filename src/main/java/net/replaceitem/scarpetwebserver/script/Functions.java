@@ -70,6 +70,7 @@ public class Functions {
         if (value instanceof FunctionValue functionValue) return functionValue;
         String name = value.getString();
         FunctionValue function = host.getFunction(name);
+        //noinspection ConstantValue
         if (function == null) {
             throw new InternalExpressionException("Function " + name + " is not defined yet");
         }

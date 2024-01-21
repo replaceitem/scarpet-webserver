@@ -21,12 +21,9 @@ public class Webserver {
         server = new Server(webserverConfig.port);
         server.setDynamic(true);
     }
-
-    public Server getServer() {
-        return server;
-    }
-
+    
     public void addRoute(String method, String path, ScarpetHandler handler) {
+        // TODO consider method
         if(uriTemplateMappingsHandler.isStarted()) throw new InternalExpressionException("Webserver is already started");
         uriTemplateMappingsHandler.addMapping(new UriTemplatePathSpec(path), handler);
     }

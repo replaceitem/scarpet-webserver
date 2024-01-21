@@ -43,6 +43,7 @@ public class ScarpetHandler extends Handler.Abstract {
 
     private String runCallback(Request request, Response response) throws CommandSyntaxException, IntegrityException, InvalidCallbackException {
         CarpetScriptHost appHost = scriptServer.getAppHostByName(this.hostname);
+        //noinspection ConstantValue
         if(appHost == null) {
             webserver.clearRoutes();
             throw new IntegrityException("App " + this.hostname + " not loaded");
