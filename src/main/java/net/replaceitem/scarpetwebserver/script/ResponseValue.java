@@ -3,8 +3,8 @@ package net.replaceitem.scarpetwebserver.script;
 import carpet.script.value.Value;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
+import org.eclipse.jetty.server.Response;
 import org.jetbrains.annotations.NotNull;
-import spark.Response;
 
 public class ResponseValue extends Value {
     

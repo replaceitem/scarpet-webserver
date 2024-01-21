@@ -5,14 +5,13 @@ import carpet.script.ScriptHost;
 import carpet.script.annotation.ScarpetFunction;
 import carpet.script.exception.InternalExpressionException;
 import carpet.script.value.FunctionValue;
-import carpet.script.value.NumericValue;
 import carpet.script.value.Value;
-import net.replaceitem.scarpetwebserver.ScarpetRoute;
+import net.replaceitem.scarpetwebserver.ScarpetHandler;
 import net.replaceitem.scarpetwebserver.ScarpetWebserver;
 import net.replaceitem.scarpetwebserver.Webserver;
-import spark.Response;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.server.Response;
 
-import javax.servlet.http.Cookie;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
@@ -24,55 +23,46 @@ public class Functions {
         }
         Webserver webserver = ScarpetWebserver.webservers.get(id);
         if(webserver == null) return null;
-        webserver.init();
+        try {
+            webserver.init();
+        } catch (Exception e) {
+            ScarpetWebserver.LOGGER.error("Could not start webserver '" + webserver.getId() + "'", e);
+            return null;
+        }
         return webserver;
+    }
+
+    @ScarpetFunction
+    public void ws_start(Context context, Webserver webserver) {
+        webserver.start();
     }
 
     @ScarpetFunction
     public void ws_add_route(Context context, Webserver webserver, String method, String path, Value callback) {
         FunctionValue callbackFunction = getCallback(context.host, callback);
-        webserver.addRoute(method, path, new ScarpetRoute(webserver, context.host.getName(), callbackFunction));
+        webserver.addRoute(method, path, new ScarpetHandler(webserver, context.host.getName(), callbackFunction));
     }
     
     @ScarpetFunction
     public void ws_not_found(Context context, Webserver webserver, Value callback) {
         FunctionValue callbackFunction = getCallback(context.host, callback);
-        webserver.setNotFound(new ScarpetRoute(webserver, context.host.getName(), callbackFunction));
+        webserver.setNotFound(new ScarpetHandler(webserver, context.host.getName(), callbackFunction));
     }
     
     
     
 
     @ScarpetFunction
-    public void ws_response_set_status(Response responseValue, int statusCode) {
-        responseValue.status(statusCode);
-    }
-    @ScarpetFunction(maxParams = 3)
-    public void ws_response_redirect(Response responseValue, String location, Integer... statusCode) {
-        Optional<Integer> optionalStatusCode = optionalArg(statusCode);
-        if(optionalStatusCode.isPresent()) {
-            responseValue.redirect(location, optionalStatusCode.get());
-        } else {
-            responseValue.redirect(location);
-        }
+    public void ws_response_set_status(Response response, int statusCode) {
+        response.setStatus(statusCode);
     }
     @ScarpetFunction
-    public void ws_response_set_content_type(Response responseValue, String contentType) {
-        responseValue.type(contentType);
+    public void ws_response_set_content_type(Response response, String contentType) {
+        response.getHeaders().put(HttpHeader.CONTENT_TYPE, contentType);
     }
     @ScarpetFunction
-    public void ws_response_set_header(Response responseValue, String header, String value) {
-        responseValue.header(header, value);
-    }
-    @ScarpetFunction(maxParams = 8)
-    public void ws_response_add_cookie(Response response, String name, String value, Value... optionalParams) {
-        Cookie cookie = new Cookie(name, value);
-        optionalArg(optionalParams, 0).map(Value::getString).ifPresent(cookie::setPath);
-        optionalArg(optionalParams, 1).map(Value::getString).ifPresent(cookie::setDomain);
-        optionalArg(optionalParams, 2).map(value1 -> NumericValue.asNumber(value1, "maxAge").getInt()).ifPresent(cookie::setMaxAge);
-        optionalArg(optionalParams, 3).map(Value::getBoolean).ifPresent(cookie::setSecure);
-        optionalArg(optionalParams, 4).map(Value::getBoolean).ifPresent(cookie::setHttpOnly);
-        response.raw().addCookie(cookie);
+    public void ws_response_add_header(Response responseValue, String header, String value) {
+        responseValue.getHeaders().put(header, value);
     }
     
     

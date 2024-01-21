@@ -1,69 +1,90 @@
 package net.replaceitem.scarpetwebserver;
 
-import net.replaceitem.scarpetwebserver.mixin.ServiceAccessor;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-import spark.RouteImpl;
-import spark.Service;
-import spark.route.HttpMethod;
-import spark.route.Routes;
-
-import javax.servlet.http.HttpServletResponse;
+import carpet.script.exception.InternalExpressionException;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.http.pathmap.UriTemplatePathSpec;
+import org.eclipse.jetty.io.Content;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.Callback;
 
 public class Webserver {
-    private final Service service;
+    private final Server server;
     private final String id;
-    private Route notFoundRoute;
+    private UriTemplateMappingsHandler uriTemplateMappingsHandler;
 
     public Webserver(Config.WebserverConfig webserverConfig) {
         this.id = webserverConfig.id;
-        service = Service.ignite();
-        service.initExceptionHandler(this::onInitException);
-        service.port(webserverConfig.port);
+        server = new Server(webserverConfig.port);
+        server.setDynamic(true);
     }
 
-    public Service getService() {
-        return service;
+    public Server getServer() {
+        return server;
     }
 
-    public void addRoute(String method, String path, ScarpetRoute route) {
-        service.addRoute(HttpMethod.get(method.toLowerCase()), RouteImpl.create(path, route));
+    public void addRoute(String method, String path, ScarpetHandler handler) {
+        if(uriTemplateMappingsHandler.isStarted()) throw new InternalExpressionException("Webserver is already started");
+        uriTemplateMappingsHandler.addMapping(new UriTemplatePathSpec(path), handler);
     }
 
-    public void init() {
+    public void init() throws Exception {
+        if(!server.isStarting() && !server.isStarted()) server.start();
         clearRoutes();
-        service.init();
-        service.after(this::afterFilter);
+    }
+    
+    public void start() {
+        try {
+            uriTemplateMappingsHandler.start();
+        } catch (Exception ignored) {}
     }
 
     public void clearRoutes() {
-        Routes routes = ((ServiceAccessor)(Object) service).getRoutes();
-        if(routes != null) routes.clear();
-        notFoundRoute = null;
+        uriTemplateMappingsHandler = new UriTemplateMappingsHandler();
+        server.setHandler(uriTemplateMappingsHandler);
+        server.setDefaultHandler(new StatusCodeHandler(HttpStatus.Code.NOT_FOUND));
     }
 
     public String getId() {
         return id;
     }
 
-    public void setNotFound(Route route) {
-        this.notFoundRoute = route;
+    public void setNotFound(ScarpetHandler route) {
+        server.setDefaultHandler(route);
     }
 
-    public void close() {
-        service.stop();
+    public void close() throws Exception {
+        server.stop();
     }
 
-    private void onInitException(Exception e) {
-        ScarpetWebserver.LOGGER.error("Error initializing webserver", e);
-    }
+    private static class StatusCodeHandler extends Handler.Abstract.NonBlocking {
 
-    private void afterFilter(Request request, Response response) throws Exception {
-        if (response.body() == null && notFoundRoute != null) {
-            response.status(HttpServletResponse.SC_NOT_FOUND);
-            Object content = notFoundRoute.handle(request, response);
-            if(content instanceof String stringContent) response.body(stringContent);
+        public StatusCodeHandler(HttpStatus.Code statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        private final HttpStatus.Code statusCode;
+
+        @Override
+        public boolean handle(Request request, Response response, Callback callback) {
+            response.setStatus(statusCode.getCode());
+            response.getHeaders().put(MimeTypes.Type.TEXT_HTML.getContentTypeField());
+            
+            Content.Sink.write(response, true, """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>%d</title>
+            </head>
+            <body>
+              <h1>%s</>
+            </body>
+            </html>
+            """.formatted(statusCode.getCode(), statusCode.toString()), callback);
+            return true;
         }
     }
 }

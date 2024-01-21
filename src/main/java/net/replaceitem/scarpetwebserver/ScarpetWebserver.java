@@ -13,7 +13,7 @@ import net.replaceitem.scarpetwebserver.script.ResponseValue;
 import net.replaceitem.scarpetwebserver.script.WebserverValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import spark.Response;
+import org.eclipse.jetty.server.Response;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +52,13 @@ public class ScarpetWebserver implements CarpetExtension, ModInitializer {
 
     @Override
     public void onServerClosed(MinecraftServer server) {
-        webservers.values().forEach(Webserver::close);
+        for (Webserver value : webservers.values()) {
+            try {
+                value.close();
+            } catch (Exception e) {
+                LOGGER.error("Failed to close webserver '" + value.getId() + "'");
+            }
+        }
         webservers.clear();
     }
 }
