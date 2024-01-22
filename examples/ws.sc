@@ -45,12 +45,13 @@ ws_add_route(ws, 'get', '/api/players', _(request, response) -> (
 
 // Example for redirecting /redirect to /
 ws_add_route(ws, 'get', '/redirect', _(request, response) -> (
-    ws_response_redirect(response, '/');
+    ws_response_add_header(response, 'Location', '/');
+    ws_response_set_status(response, 300);
 ));
 
 // Using route patterns to make a player parameter in the url
-ws_add_route(ws, 'get', 'api/getplayerdata/:playername', _(request, response) -> (
-    p = player(request:'params':':playername');
+ws_add_route(ws, 'get', '/api/getplayerdata/{playername}', _(request, response) -> (
+    p = player(request:'pathParams':'playername');
     ws_response_set_content_type(response, 'application/json');
     if(p == null,
         ws_response_set_status(response, 400);
