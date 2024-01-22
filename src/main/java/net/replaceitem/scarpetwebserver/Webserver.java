@@ -1,6 +1,7 @@
 package net.replaceitem.scarpetwebserver;
 
 import carpet.script.exception.InternalExpressionException;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.pathmap.UriTemplatePathSpec;
@@ -14,7 +15,7 @@ import org.eclipse.jetty.util.Callback;
 public class Webserver {
     private final Server server;
     private final String id;
-    private UriTemplateMappingsHandler uriTemplateMappingsHandler;
+    private MethodMappingsHandler<UriTemplateMappingsHandler> methodMappingsHandler;
 
     public Webserver(Config.WebserverConfig webserverConfig) {
         this.id = webserverConfig.id;
@@ -23,8 +24,8 @@ public class Webserver {
     }
     
     public void addRoute(String method, String path, ScarpetHandler handler) {
-        // TODO consider method
-        if(uriTemplateMappingsHandler.isStarted()) throw new InternalExpressionException("Webserver is already started");
+        HttpMethod httpMethod = HttpMethod.INSENSITIVE_CACHE.get(method);
+        UriTemplateMappingsHandler uriTemplateMappingsHandler = methodMappingsHandler.computeIfAbsent(httpMethod, (m) -> new UriTemplateMappingsHandler());
         uriTemplateMappingsHandler.addMapping(new UriTemplatePathSpec(path), handler);
     }
 
@@ -35,13 +36,13 @@ public class Webserver {
     
     public void start() {
         try {
-            uriTemplateMappingsHandler.start();
+            methodMappingsHandler.start();
         } catch (Exception ignored) {}
     }
 
     public void clearRoutes() {
-        uriTemplateMappingsHandler = new UriTemplateMappingsHandler();
-        server.setHandler(uriTemplateMappingsHandler);
+        methodMappingsHandler = new MethodMappingsHandler<>();
+        server.setHandler(methodMappingsHandler);
         server.setDefaultHandler(new StatusCodeHandler(HttpStatus.Code.NOT_FOUND));
     }
 
