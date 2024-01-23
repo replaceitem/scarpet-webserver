@@ -38,7 +38,7 @@ public class ScarpetHandler extends Handler.Abstract {
         } catch (Exception e) {
             ScarpetWebserver.LOGGER.error("Got exception when running webserver route callback on " + request.getHttpURI(), e);
             callback.failed(e);
-            return false;
+            return true;
         }
         return true;
     }
