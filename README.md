@@ -9,12 +9,11 @@
 
 **Requires [Carpet mod](https://modrinth.com/mod/carpet)**
 
-*Warning: Only use this mod with scripts you trust or made yourself. Use at your own risk.*
+*Warning: Only use this mod with scripts you trust or made yourself. Use this at your own risk.*
+
+This project uses and includes [Jetty 12](https://eclipse.dev/jetty/) in builds for the webserver ([License](https://github.com/jetty/jetty.project/blob/jetty-12.0.x/LICENSE))
 
 ## Usage
-
-This mod uses [Spark](https://sparkjava.com/) for running the webserver, and adapts most its syntax from it.
-For more details on the function, take a look at the [Spark docs](https://sparkjava.com/documentation).
 
 To use a webserver in scarpet, it has to be defined in the `scarpet-webserver.json` config file first.
 When the mod first loads, it creates a sample config, where you can define multiple webservers. Each one has a unique `id` and a `port`.
@@ -52,16 +51,17 @@ ws_add_route(ws, 'get', '/api/players', _(request, response) -> (
 
 // Example for redirecting /redirect to /
 ws_add_route(ws, 'get', '/redirect', _(request, response) -> (
-    ws_response_redirect(response, '/');
+    ws_response_add_header(response, 'Location', '/');
+    ws_response_set_status(response, 300);
 ));
 
 // Using route patterns to make a player parameter in the url
-ws_add_route(ws, 'get', 'api/getplayerdata/:playername', _(request, response) -> (
-    p = player(request:'params':':playername');
+ws_add_route(ws, 'get', '/api/getplayerdata/{playername}', _(request, response) -> (
+    p = player(request:'pathParams':'playername');
     ws_response_set_content_type(response, 'application/json');
     if(p == null,
         ws_response_set_status(response, 400);
-        return(encode_json({'error'->'Invalid player'}));
+    return(encode_json({'error'->'Invalid player'}));
     );
     return(encode_json(parse_nbt(p~'nbt')));
 ));
@@ -89,8 +89,7 @@ _(request, response) -> (
 ```
 
 The `request` parameter provides a map of all the request details.
-You can find a description of what they do [here](https://sparkjava.com/documentation#request).
-You can also use the [example script](#example-syntax) which has a `/requestdump` route that sends all the request data as json back.
+You can also use the [example script](#example-syntax) for testing, which has a `/requestdump` route that sends all the request data as json back.
 
 The `response` is a [response value](#response).
 
@@ -103,7 +102,7 @@ This mod adds two new value types:
 #### `webserver`
 
 This is a handle to the running webserver, which use to create routes.
-This can be retrieved using [`ws_init(id)`](#wsinitid).
+This can be retrieved using [`ws_init(id)`](#ws_initid).
 
 #### `response`
 
@@ -115,14 +114,18 @@ This value is provided in route callbacks, and is used to assign various respons
 #### `ws_init(id)`
 
 Returns a [`webserver`](#webserver) value from the config `id`.
+This also clears all routes and starts it, if it isn't already.
 
 #### `ws_add_route(webserver, method, path, callback)`
 
 Adds a route to the `webserver`.
-Method can be one of `get`, `post`, `put`, `patch`, `delete`, `head`, `trace`, `connect` and `options`.
+`method` is the http method, like `get` or `post`.
 The callback can be either a string of the name of a previously declared function, or a lambda function.
 See the [route callback](#route-callback) section for more details.
-The `path` can also contain placeholders (For more details, see the [Spark](https://sparkjava.com/documentation#routes) docs)
+The `path` uses jetty's [UriTemplatePathSpec](https://eclipse.dev/jetty/javadoc/jetty-12/org/eclipse/jetty/http/pathmap/UriTemplatePathSpec.html),
+so you can use [its syntax (Level 1)](https://tools.ietf.org/html/rfc6570).
+
+It supports path parameters like `/shop/{product}`, which can then be retrieved using `request:'pathParams':'product'`.
 
 #### `ws_not_found(webserver, callback)`
 
@@ -132,30 +135,10 @@ Sets the handler for requests without a matching route.
 
 Sets a http status code for the `response`.
 
-#### `ws_response_redirect(response, location, statusCode?)`
-
-Sends a browser redirect to `location` for the `response`, with an optional `statusCode`.
-
-[Spark equivalent](https://sparkjava.com/documentation#redirects)
-
 #### `ws_response_set_content_type(response, contentType)`
 
 Sets content type for the response.
 
-#### `ws_response_set_header(response, header, value)`
+#### `ws_response_add_header(response, header, value)`
 
 Adds a response header.
-
-#### `ws_response_add_cookie(response, name, value, path?, domain?, maxAge?, secure?, httpOnly?)`
-
-Adds a cookie to the response.
-
-* `name`: String
-* `value`: String
-* `Path`: Optional String
-* `Domain`: Optional stirng
-* `maxAge`: Optional number
-* `secure`: Optional boolean
-* `httpOnly`: Optional boolean
-
-[More details about these parameters](https://docs.oracle.com/javaee%2F7%2Fapi%2F%2F/javax/servlet/http/Cookie.html)
