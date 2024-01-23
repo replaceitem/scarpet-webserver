@@ -2,6 +2,7 @@ plugins {
     id 'fabric-loom' version '1.2-SNAPSHOT'
     id 'maven-publish'
     id "com.modrinth.minotaur" version "2.+"
+    id "io.github.dexman545.outlet" version "1.6.1"
 }
 
 version = project.mod_version
@@ -73,9 +74,6 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
     }
-    from("NOTICE") {
-        rename { "${it}_${project.archivesBaseName}"}
-    }
 }
 
 
@@ -85,6 +83,8 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "1BG4YFps"
     versionNumber = project.mod_version
+    outlet.mcVersionRange = ">=1.17"
+    gameVersions = outlet.mcVersions()
     versionType = "beta"
     uploadFile = remapJar
     loaders = ["fabric"]
