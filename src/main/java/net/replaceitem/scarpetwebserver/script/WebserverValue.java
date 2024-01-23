@@ -3,7 +3,7 @@ package net.replaceitem.scarpetwebserver.script;
 import carpet.script.value.Value;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.replaceitem.scarpetwebserver.Webserver;
+import net.replaceitem.scarpetwebserver.webserver.Webserver;
 import org.jetbrains.annotations.NotNull;
 
 public class WebserverValue extends Value {

@@ -1,6 +1,6 @@
-package net.replaceitem.scarpetwebserver;
+package net.replaceitem.scarpetwebserver.webserver;
 
-import carpet.script.exception.InternalExpressionException;
+import net.replaceitem.scarpetwebserver.Config;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.MimeTypes;

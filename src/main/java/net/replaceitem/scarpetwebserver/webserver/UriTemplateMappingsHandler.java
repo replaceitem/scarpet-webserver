@@ -1,4 +1,4 @@
-package net.replaceitem.scarpetwebserver;
+package net.replaceitem.scarpetwebserver.webserver;
 
 import org.eclipse.jetty.http.pathmap.MappedResource;
 import org.eclipse.jetty.http.pathmap.MatchedResource;

@@ -1,4 +1,4 @@
-package net.replaceitem.scarpetwebserver;
+package net.replaceitem.scarpetwebserver.util;
 
 import carpet.script.value.BooleanValue;
 import carpet.script.value.MapValue;

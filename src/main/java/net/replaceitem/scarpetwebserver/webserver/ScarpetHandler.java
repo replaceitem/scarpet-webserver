@@ -1,4 +1,4 @@
-package net.replaceitem.scarpetwebserver;
+package net.replaceitem.scarpetwebserver.webserver;
 
 import carpet.script.CarpetScriptHost;
 import carpet.script.exception.IntegrityException;
@@ -7,6 +7,7 @@ import carpet.script.value.FunctionValue;
 import carpet.script.value.Value;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
+import net.replaceitem.scarpetwebserver.ScarpetWebserver;
 import net.replaceitem.scarpetwebserver.script.ResponseValue;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Handler;
@@ -37,6 +38,7 @@ public class ScarpetHandler extends Handler.Abstract {
         } catch (Exception e) {
             ScarpetWebserver.LOGGER.error("Got exception when running webserver route callback on " + request.getHttpURI(), e);
             callback.failed(e);
+            return false;
         }
         return true;
     }

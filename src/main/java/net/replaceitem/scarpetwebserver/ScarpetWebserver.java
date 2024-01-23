@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.replaceitem.scarpetwebserver.script.Functions;
 import net.replaceitem.scarpetwebserver.script.ResponseValue;
 import net.replaceitem.scarpetwebserver.script.WebserverValue;
+import net.replaceitem.scarpetwebserver.webserver.Webserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Response;

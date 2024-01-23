@@ -6,9 +6,9 @@ import carpet.script.annotation.ScarpetFunction;
 import carpet.script.exception.InternalExpressionException;
 import carpet.script.value.FunctionValue;
 import carpet.script.value.Value;
-import net.replaceitem.scarpetwebserver.ScarpetHandler;
+import net.replaceitem.scarpetwebserver.webserver.ScarpetHandler;
 import net.replaceitem.scarpetwebserver.ScarpetWebserver;
-import net.replaceitem.scarpetwebserver.Webserver;
+import net.replaceitem.scarpetwebserver.webserver.Webserver;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.server.Response;
 

@@ -1,4 +1,4 @@
-package net.replaceitem.scarpetwebserver;
+package net.replaceitem.scarpetwebserver.webserver;
 
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Handler;
