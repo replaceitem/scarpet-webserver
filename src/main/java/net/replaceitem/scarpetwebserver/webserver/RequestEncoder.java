@@ -10,6 +10,7 @@ import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.server.ConnectionMetaData;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.util.Fields;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ public class RequestEncoder {
         map.put("headers", mapMap(getHeadersAsMap(request.getHeaders()), StringValue::of, Function.identity()));
         map.put("method", request.getMethod());
         map.put("connection", encodeConnection(request.getConnectionMetaData()));
-        map.put("uri", encodeUri(request.getHttpURI()));
+        map.put("uri", encodeUri(request));
         if(request.getAttribute(UriTemplateMappingsHandler.PATH_PARAMETER_ATTRIBUTE) instanceof Map<?,?> pathParameterAttribute) {
             map.put("pathParams", mapMap(pathParameterAttribute, value -> StringValue.of(((String) value)), value -> StringValue.of(((String) value))));
         }
@@ -32,8 +33,9 @@ public class RequestEncoder {
         return map.build();
     }
 
-    private static MapValue encodeUri(HttpURI httpURI) {
+    private static MapValue encodeUri(Request request) {
         MapValueBuilder map = new MapValueBuilder();
+        HttpURI httpURI = request.getHttpURI();
 
         map.put("scheme", httpURI.getScheme());
         map.put("authority", httpURI.getAuthority());
@@ -47,7 +49,17 @@ public class RequestEncoder {
         map.put("fragment", httpURI.getFragment());
         map.put("user", httpURI.getUser());
         map.put("asString", httpURI.asString());
+        map.put("queryParameters", encodeQueryParameters(request));
 
+        return map.build();
+    }
+    
+    private static MapValue encodeQueryParameters(Request request) {
+        MapValueBuilder map = new MapValueBuilder();
+        Fields fields = Request.extractQueryParameters(request);
+        for (Fields.Field field : fields) {
+            map.put(field.getName(), field.hasMultipleValues() ? ListValue.wrap(field.getValues().stream().map(StringValue::of).toList()) : StringValue.of(field.getValue()));
+        }
         return map.build();
     }
 
