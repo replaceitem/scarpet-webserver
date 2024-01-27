@@ -5,7 +5,6 @@ import carpet.script.value.MapValue;
 import carpet.script.value.StringValue;
 import carpet.script.value.Value;
 import net.replaceitem.scarpetwebserver.util.MapValueBuilder;
-import net.replaceitem.scarpetwebserver.webserver.UriTemplateMappingsHandler;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
@@ -24,7 +23,6 @@ public class RequestEncoder {
         map.put("beginNanoTime", request.getBeginNanoTime());
         map.put("headers", mapMap(getHeadersAsMap(request.getHeaders()), StringValue::of, Function.identity()));
         map.put("method", request.getMethod());
-        map.put("attributes", mapMap(request.asAttributeMap(), StringValue::of, o -> StringValue.of(o.toString())));
         map.put("connection", encodeConnection(request.getConnectionMetaData()));
         map.put("uri", encodeUri(request.getHttpURI()));
         if(request.getAttribute(UriTemplateMappingsHandler.PATH_PARAMETER_ATTRIBUTE) instanceof Map<?,?> pathParameterAttribute) {
