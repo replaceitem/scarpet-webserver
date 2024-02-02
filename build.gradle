@@ -110,7 +110,6 @@ modrinth {
             // carpet
             new ModDependency("TQTTVgYE" ,"required")
     ]
-    debugMode = true
     gradle.taskGraph.whenReady { TaskExecutionGraph taskGraph ->
         if (taskGraph.hasTask(":modrinth")) {
             changelog = promptChangelog() ?: "*No changelog provided*"
