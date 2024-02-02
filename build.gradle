@@ -80,7 +80,22 @@ jar {
 }
 
 
-import com.modrinth.minotaur.dependencies.ModDependency
+import com.modrinth.minotaur.dependencies.ModDependency 
+
+String promptChangelog() {
+    File changelogFile = project.file("changelog.md")
+    changelogFile.createNewFile()
+    println "Edit " + changelogFile.getAbsolutePath() + " and press [Enter] to confirm"
+    System.in.read()
+    String changelog
+    try {
+        changelog = changelogFile.text;
+    } catch (ignored) {
+        changelog = null
+    }
+    changelogFile.delete()
+    return changelog
+}
 
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
@@ -95,10 +110,11 @@ modrinth {
             // carpet
             new ModDependency("TQTTVgYE" ,"required")
     ]
-    try {
-        changelog = rootProject.file("changelog.md").text
-    } catch(FileNotFoundException ignored) { // github actions would fail otherwise
-        changelog = ""
+    debugMode = true
+    gradle.taskGraph.whenReady { TaskExecutionGraph taskGraph ->
+        if (taskGraph.hasTask(":modrinth")) {
+            changelog = promptChangelog() ?: "*No changelog provided*"
+        }
     }
     syncBodyFrom = rootProject.file("README.md").text
 }
