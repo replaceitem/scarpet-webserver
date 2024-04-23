@@ -3,6 +3,7 @@ package net.replaceitem.scarpetwebserver.script;
 import carpet.script.value.Value;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.DynamicRegistryManager;
 import org.eclipse.jetty.server.Response;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,7 @@ public class ResponseValue extends Value {
     }
 
     @Override
-    public @NotNull NbtElement toTag(boolean force) {
+    public @NotNull NbtElement toTag(boolean force, DynamicRegistryManager regs) {
         return NbtString.of(this.toString());
     }
 }
