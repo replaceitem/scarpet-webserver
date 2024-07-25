@@ -7,6 +7,7 @@ read_file_raw_any(file) -> join('\n',read_file(file,'any'));
 global_root_page = read_file_raw_any('index.html');
 global_player_element = read_file_raw_any('player.html');
 global_404_page = read_file_raw_any('404.html');
+global_postreply_template = read_file_raw_any('postreply.html');
 
 
 populateTemplate(html, replacementMap) -> (
@@ -52,7 +53,7 @@ ws_add_route(ws, 'get', '/redirect', _(request, response) -> (
 
 // Using route patterns to make a player parameter in the url
 ws_add_route(ws, 'get', '/api/getplayerdata/{player}', _(request, response) -> (
-    playername = request:'pathParams':'player';
+    playername = request~'pathParams':'player';
     p = player(playername);
     ws_response_set_content_type(response, 'application/json');
     if(p == null,
@@ -62,10 +63,26 @@ ws_add_route(ws, 'get', '/api/getplayerdata/{player}', _(request, response) -> (
     return(encode_json(parse_nbt(p~'nbt')));
 ));
 
+global_request_fields = [
+    'headers',
+    'method',
+    'beginNanoTime',
+    'connection',
+    'uri',
+    'pathParams',
+    'body_string'
+];
+
 // Returns the request data directly for testing/debugging
 ws_add_route(ws, 'get', '/requestdump', _(request, response) -> (
     ws_response_set_content_type(response, 'application/json');
-    return(encode_json(request));
+    request_data = {};
+    for(global_request_fields, request_data:_ = request~_);
+    return(encode_json(request_data));
+));
+
+ws_add_route(ws, 'post', '/postreply', _(request, response) -> (
+    return(populateTemplate(global_postreply_template, {'BODY' -> request~'body_string'}));
 ));
 
 // Custom 404 page

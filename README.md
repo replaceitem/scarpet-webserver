@@ -34,7 +34,8 @@ This server can then be used in a script.
 
 ### Example syntax
 
-You can take a look at the full working example with the html files [here](https://github.com/replaceitem/scarpet-webserver/tree/master/examples)
+You can take a look at the full working example with the html files [here](https://github.com/replaceitem/scarpet-webserver/tree/master/examples).
+The example also contains more routes and a simple templating mechanis
 
 ```js
 // Initialize the webserver with id 'test' (Defined in the config)
@@ -58,7 +59,7 @@ ws_add_route(ws, 'get', '/redirect', _(request, response) -> (
 
 // Using route patterns to make a player parameter in the url
 ws_add_route(ws, 'get', '/api/getplayerdata/{player}', _(request, response) -> (
-    playername = request:'pathParams':'player';
+    playername = request~'pathParams':'player';
     p = player(playername);
     ws_response_set_content_type(response, 'application/json');
     if(p == null,
@@ -71,7 +72,9 @@ ws_add_route(ws, 'get', '/api/getplayerdata/{player}', _(request, response) -> (
 // Returns the request data directly for testing/debugging
 ws_add_route(ws, 'get', '/requestdump', _(request, response) -> (
     ws_response_set_content_type(response, 'application/json');
-    return(encode_json(request));
+    request_data = {};
+    for(global_request_fields, request_data:_ = request~_);
+    return(encode_json(request_data));
 ));
 
 // Custom 404 page
@@ -90,7 +93,7 @@ _(request, response) -> (
 )
 ```
 
-The `request` parameter provides a map of all the request details.
+The `request` parameter provides a [request value](#request) of all the request details.
 You can also use the [example script](#example-syntax) for testing, which has a `/requestdump` route that sends all the request data as json back.
 
 The `response` is a [response value](#response).
@@ -105,6 +108,14 @@ This mod adds two new value types:
 
 This is a handle to the running webserver, which use to create routes.
 This can be retrieved using [`ws_init(id)`](#ws_initid).
+
+#### `request`
+
+This value is provided in route callbacks, and is used to retrieve various request data.
+Run the example script and send a request to `/requestdump`.
+Note that retrieving values from this value needs to be done using the `~` query operator,
+but some of those values are maps, which are accessed using `:`.
+
 
 #### `response`
 
