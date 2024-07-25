@@ -47,6 +47,6 @@ public class WebserverValue extends Value {
 
     @Override
     public @NotNull NbtElement toTag(boolean force, DynamicRegistryManager regs) {
-        return NbtString.of(this.toString());
+        return NbtString.of(this.getString());
     }
 }

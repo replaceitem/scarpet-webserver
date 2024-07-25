@@ -14,6 +14,10 @@ public class ResponseValue extends Value {
     public ResponseValue(Response response) {
         this.response = response;
     }
+    
+    public static Value of(Response response) {
+        return response == null ? NULL : new ResponseValue(response);
+    }
 
     public Response getResponse() {
         return response;
@@ -36,6 +40,6 @@ public class ResponseValue extends Value {
 
     @Override
     public @NotNull NbtElement toTag(boolean force, DynamicRegistryManager regs) {
-        return NbtString.of(this.toString());
+        return NbtString.of(this.getString());
     }
 }

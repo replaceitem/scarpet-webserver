@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class MapValueBuilder {
     private final Map<Value, Value> map = new HashMap<>();
@@ -34,5 +35,14 @@ public class MapValueBuilder {
     
     public MapValue build() {
         return MapValue.wrap(map);
+    }
+
+
+    public static <K,V> MapValue mapMap(Map<K,V> map, Function<K,Value> keyMapper, Function<V,Value> valueMapper) {
+        Map<Value,Value> valueMap = new HashMap<>();
+        for (Map.Entry<K, V> kkEntry : map.entrySet()) {
+            valueMap.put(keyMapper.apply(kkEntry.getKey()), valueMapper.apply(kkEntry.getValue()));
+        }
+        return MapValue.wrap(valueMap);
     }
 }

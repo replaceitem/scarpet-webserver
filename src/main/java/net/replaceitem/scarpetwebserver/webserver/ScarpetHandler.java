@@ -8,6 +8,7 @@ import carpet.script.value.Value;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
 import net.replaceitem.scarpetwebserver.ScarpetWebserver;
+import net.replaceitem.scarpetwebserver.script.RequestValue;
 import net.replaceitem.scarpetwebserver.script.ResponseValue;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Handler;
@@ -36,7 +37,7 @@ public class ScarpetHandler extends Handler.Abstract {
             String body = runCallback(request, response);
             Content.Sink.write(response, true, body, callback);
         } catch (Exception e) {
-            ScarpetWebserver.LOGGER.error("Got exception when running webserver route callback on " + request.getHttpURI(), e);
+            ScarpetWebserver.LOGGER.error("Got exception when running webserver route callback on {}", request.getHttpURI(), e);
             callback.failed(e);
             return true;
         }
@@ -52,7 +53,7 @@ public class ScarpetHandler extends Handler.Abstract {
         }
         ServerCommandSource commandSource = appHost.scriptServer().server.getCommandSource();
         CarpetScriptHost executingHost = appHost.retrieveOwnForExecution(commandSource);
-        List<Value> args = List.of(RequestEncoder.encodeRequest(request), new ResponseValue(response));
+        List<Value> args = List.of(RequestValue.of(request), ResponseValue.of(response));
         return executingHost.callUDF(commandSource, callback, args).getString();
     }
 }
