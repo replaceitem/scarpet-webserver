@@ -1,5 +1,6 @@
 package net.replaceitem.scarpetwebserver.script;
 
+import carpet.script.exception.InternalExpressionException;
 import carpet.script.value.*;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
@@ -49,7 +50,7 @@ public class RequestValue extends Value {
             case "pathParams" -> getPathParams();
             case "body_string" -> getBodyString();
             
-            default -> NULL;
+            default -> throw new InternalExpressionException("Unknown request query: " + value1.getString());
         };
     }
 
