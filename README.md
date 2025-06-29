@@ -52,7 +52,7 @@ ws_add_route(ws, 'get', '/api/players', _(request, response) -> (
 
 // Example for redirecting /redirect to /
 ws_add_route(ws, 'get', '/redirect', _(request, response) -> (
-    ws_response_set_status(response, 300);
+    ws_response_set_status(response, 301);
     ws_response_add_header(response, 'Location', '/');
     ''
 ));
