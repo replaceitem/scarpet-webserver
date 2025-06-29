@@ -1,1 +1,1 @@
-* Update to Java 21, MC 1.20.5
+* Query invalid keys of `request` now throws an error instead of returning `null`
