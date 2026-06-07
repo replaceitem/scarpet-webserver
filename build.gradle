@@ -63,11 +63,12 @@ java {
 }
 
 jar {
+    inputs.property "archivesBaseName", project.base.archivesName
     from("LICENSE") {
-        rename { "${it}_${archives_base_name}"}
+        rename { "${it}_${inputs.properties.archivesBaseName}"}
     }
     from("NOTICE") {
-        rename { "${it}_${archives_base_name}"}
+        rename { "${it}_${inputs.properties.archivesBaseName}"}
     }
 }
 
