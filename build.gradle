@@ -78,7 +78,7 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "1BG4YFps"
     versionNumber = project.mod_version
-    outlet.mcVersionRange = "26.1.*" // Java 25+
+    outlet.mcVersionRange = ">=26.1" // Java 25+
     gameVersions = outlet.mcVersions()
     versionType = "beta"
     uploadFile = jar

@@ -20,7 +20,7 @@
     },
     "depends": {
         "fabricloader": "*",
-        "minecraft": "26.1.*",
+        "minecraft": ">=26.1",
         "carpet": ">=26.1",
         "java": ">=25"
     },
