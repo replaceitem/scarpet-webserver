@@ -5,12 +5,12 @@ plugins {
     id "io.github.dexman545.outlet" version "1.6.1"
 }
 
-
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
 version = project.mod_version
 group = project.maven_group
+
+base {
+    archivesName = archives_base_name
+}
 
 repositories {
     maven {
@@ -58,15 +58,17 @@ tasks.withType(JavaCompile).configureEach {
 
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
 }
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
+        rename { "${it}_${archives_base_name}"}
     }
     from("NOTICE") {
-        rename { "${it}_${project.archivesBaseName}"}
+        rename { "${it}_${archives_base_name}"}
     }
 }
 
