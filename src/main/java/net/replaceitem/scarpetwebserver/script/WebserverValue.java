@@ -1,9 +1,9 @@
 package net.replaceitem.scarpetwebserver.script;
 
 import carpet.script.value.Value;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.replaceitem.scarpetwebserver.webserver.Webserver;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,7 +46,7 @@ public class WebserverValue extends Value {
     }
 
     @Override
-    public @NotNull NbtElement toTag(boolean force, DynamicRegistryManager regs) {
-        return NbtString.of(this.getString());
+    public @NotNull Tag toTag(boolean force, RegistryAccess regs) {
+        return StringTag.valueOf(this.getString());
     }
 }
