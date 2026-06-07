@@ -6,7 +6,7 @@ import carpet.script.exception.InvalidCallbackException;
 import carpet.script.value.FunctionValue;
 import carpet.script.value.Value;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.replaceitem.scarpetwebserver.ScarpetWebserver;
 import net.replaceitem.scarpetwebserver.script.RequestValue;
 import net.replaceitem.scarpetwebserver.script.ResponseValue;
@@ -51,7 +51,7 @@ public class ScarpetHandler extends Handler.Abstract {
             webserver.clearRoutes();
             throw new IntegrityException("App " + this.hostname + " not loaded");
         }
-        ServerCommandSource commandSource = appHost.scriptServer().server.getCommandSource();
+        CommandSourceStack commandSource = appHost.scriptServer().server.createCommandSourceStack();
         CarpetScriptHost executingHost = appHost.retrieveOwnForExecution(commandSource);
         List<Value> args = List.of(RequestValue.of(request), ResponseValue.of(response));
         return executingHost.callUDF(commandSource, callback, args).getString();
