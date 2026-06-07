@@ -1,1 +1,1 @@
-* Query invalid keys of `request` now throws an error instead of returning `null`
+* Updated to Minecraft 1.21.11 (Thanks to [#1](https://github.com/replaceitem/scarpet-webserver/pull/1))
