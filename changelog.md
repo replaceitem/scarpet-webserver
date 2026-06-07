@@ -1,1 +1,1 @@
-* Updated to Minecraft 1.21.11 (Thanks to [#1](https://github.com/replaceitem/scarpet-webserver/pull/1))
+* Updated to Minecraft 26.1 (Thanks to [#2](https://github.com/replaceitem/scarpet-webserver/pull/2/changes))
