@@ -87,3 +87,29 @@ ws_add_route(ws, 'post', '/postreply', _(request, response) -> (
 
 // Custom 404 page
 ws_not_found(ws, _(request, response) -> global_404_page);
+
+// SSE (Server-Sent Events) route example, storing all connection in a list
+global_sse_connections = [];
+
+ws_sse_add_route(ws, '/api/sse', _(connection) -> (
+    // Basic authorization token example
+    if(connection~'request'~'headers':'Authorization' != 'Bearer abcd1234', return(
+        ws_sse_override_response(connection, _(request, response) -> (
+            ws_response_set_status(response, 401);
+            'Invalid token provided\n'
+        ))
+    ));
+    ws_sse_add_header(connection, 'X-Custom', 'hello');
+    global_sse_connections += connection
+));
+
+// Function for pruning closed connections from the list.
+// Can either be manually called, or run repeatedly using the schedule function.
+prune_closed_connections() -> global_sse_connections = filter(global_sse_connections, !_~'closed');
+
+// Listen for block place events and send messages to all connections
+__on_player_places_block(player, item_tuple, hand, block) -> (
+    n = for(global_sse_connections, ws_sse_send_message(_, 'place', player + ' placed ' + block + ' with their ' + hand));
+    print('sent message to ' + n + ' SSE connections');
+    prune_closed_connections()
+);

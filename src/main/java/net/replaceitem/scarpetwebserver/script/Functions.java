@@ -1,12 +1,9 @@
 package net.replaceitem.scarpetwebserver.script;
 
 import carpet.script.Context;
-import carpet.script.ScriptHost;
 import carpet.script.annotation.ScarpetFunction;
-import carpet.script.exception.InternalExpressionException;
-import carpet.script.value.FunctionValue;
 import carpet.script.value.Value;
-import net.replaceitem.scarpetwebserver.webserver.ScarpetHandler;
+import net.replaceitem.scarpetwebserver.SSEConnection;
 import net.replaceitem.scarpetwebserver.ScarpetWebserver;
 import net.replaceitem.scarpetwebserver.webserver.Webserver;
 import org.eclipse.jetty.http.HttpHeader;
@@ -26,10 +23,15 @@ public class Functions {
         try {
             webserver.init();
         } catch (Exception e) {
-            ScarpetWebserver.LOGGER.error("Could not start webserver '" + webserver.getId() + "'", e);
+            ScarpetWebserver.LOGGER.error("Could not start webserver '{}'", webserver.getId(), e);
             return null;
         }
         return webserver;
+    }
+
+    @ScarpetFunction
+    public Webserver ws_get(Context context, String id) {
+        return ScarpetWebserver.webservers.get(id);
     }
 
     @ScarpetFunction
@@ -39,52 +41,51 @@ public class Functions {
 
     @ScarpetFunction
     public void ws_add_route(Context context, Webserver webserver, String method, String path, Value callback) {
-        FunctionValue callbackFunction = getCallback(context.host, callback);
-        webserver.addRoute(method, path, new ScarpetHandler(webserver, context.host.getName(), callbackFunction));
+        webserver.addRoute(method, path, context.host, callback);
     }
     
     @ScarpetFunction
     public void ws_not_found(Context context, Webserver webserver, Value callback) {
-        FunctionValue callbackFunction = getCallback(context.host, callback);
-        webserver.setNotFound(new ScarpetHandler(webserver, context.host.getName(), callbackFunction));
+        webserver.setNotFound(context.host, callback);
     }
-    
-    
-    
 
     @ScarpetFunction
     public void ws_response_set_status(Response response, int statusCode) {
         response.setStatus(statusCode);
     }
+
     @ScarpetFunction
     public void ws_response_set_content_type(Response response, String contentType) {
         response.getHeaders().put(HttpHeader.CONTENT_TYPE, contentType);
     }
+
     @ScarpetFunction
     public void ws_response_add_header(Response responseValue, String header, String value) {
         responseValue.getHeaders().put(header, value);
     }
-    
-    
-    private static FunctionValue getCallback(ScriptHost host, Value value) {
-        if (value instanceof FunctionValue functionValue) return functionValue;
-        String name = value.getString();
-        FunctionValue function = host.getFunction(name);
-        //noinspection ConstantValue
-        if (function == null) {
-            throw new InternalExpressionException("Function " + name + " is not defined yet");
-        }
-        return function;
+
+    @ScarpetFunction
+    public void ws_sse_add_route(Context context, Webserver webserver, String path, Value callback) {
+        webserver.addSSERoute(path, context.host, callback);
     }
 
-    public static <T> Optional<T> optionalArg(T[] array, int index) {
-        if (array == null || array.length <= index) return Optional.empty();
-        T t = array[index];
-        if(t == null || (t instanceof Value value && value.isNull())) return Optional.empty();
-        return Optional.of(t);
+    @ScarpetFunction
+    public boolean ws_sse_override_response(Context context, SSEConnection connection, Value callback) {
+        return connection.overrideResponse(context.host, callback);
     }
 
-    public static <T> Optional<T> optionalArg(T[] array) {
-        return optionalArg(array, 0);
+    @ScarpetFunction
+    public boolean ws_sse_add_header(SSEConnection connection, String header, String value) {
+        return connection.addHeader(header, value);
+    }
+
+    @ScarpetFunction(maxParams = 4)
+    public boolean ws_sse_send_message(Context context, SSEConnection connection, Optional<String> event, String data, Optional<Value> callback) {
+        return connection.sendMessage(event, data, context.host, callback);
+    }
+
+    @ScarpetFunction(maxParams = 2)
+    public boolean ws_sse_close(Context context, SSEConnection connection, Optional<Value> callback) {
+        return connection.close(context.host, callback);
     }
 }
