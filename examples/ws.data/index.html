@@ -7,35 +7,20 @@
             body {
                 font-family: helvetica, sans-serif;
             }
-            .player-list {
-                width: fit-content;
-            }
             .player-container {
                 display: flex;
                 align-items: center;
-                width: 100%;
-                border-radius: 16px;
-                background-color: lightgray;
-                margin-bottom: 10px;
-            }
-            .player-icon {
-                height: 64px;
-                padding: 0.1em;
-            }
-            .player-name {
-                font-size: 1.6em;
-                vertical-align: center;
-                padding-right: 0.4em;
-                padding-left: 0.1em;
+                gap: 10px;
+                margin-bottom: 4px;
             }
         </style>
     </head>
     <body>
         <h1>scarpet-webserver demo</h1>
         <h2>Active players</h2>
-        <div class="player-list">
+        <ul class="player-list">
             $PLAYERS$
-        </div>
+        </ul>
         <h2>Other pages</h2>
 
         <a href="/requestdump">Request dump</a><br>

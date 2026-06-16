@@ -20,8 +20,14 @@ populateTemplate(html, replacementMap) -> (
 
 
 on_root(request, response) -> (
+    all_players = player('all');
+    players_html = if(length(all_players) == 0,
+        '<i>No players active</i>'
+    ,
+        join('\n',map(all_players, populate_player_html(_)))
+    );
     populateTemplate(global_root_page, {
-        'PLAYERS' -> join('\n',map(player('all'), populate_player_html(_)))
+        'PLAYERS' -> players_html,
     })
 );
 
