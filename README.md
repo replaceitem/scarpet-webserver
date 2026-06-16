@@ -84,14 +84,6 @@ ws_not_found(ws, _(request, response) -> global_404_page);
 global_sse_connections = [];
 
 ws_sse_add_route(ws, '/api/sse', _(connection) -> (
-    // Basic authorization token example
-    if(connection~'request'~'headers':'Authorization' != 'Bearer abcd1234', return(
-        ws_sse_override_response(connection, _(request, response) -> (
-            ws_response_set_status(response, 401);
-            'Invalid token provided\n'
-        ))
-    ));
-    ws_sse_add_header(connection, 'X-Custom', 'hello');
     global_sse_connections += connection
 ));
 

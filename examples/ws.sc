@@ -7,6 +7,7 @@ read_file_raw_any(file) -> join('\n',read_file(file,'any'));
 global_root_page = read_file_raw_any('index.html');
 global_player_element = read_file_raw_any('player.html');
 global_404_page = read_file_raw_any('404.html');
+global_sse_page = read_file_raw_any('sse.html');
 global_postreply_template = read_file_raw_any('postreply.html');
 
 
@@ -88,18 +89,13 @@ ws_add_route(ws, 'post', '/postreply', _(request, response) -> (
 // Custom 404 page
 ws_not_found(ws, _(request, response) -> global_404_page);
 
+// Page for SSE events
+ws_add_route(ws, 'get', '/sse', _(request, response) -> global_sse_page);
+
 // SSE (Server-Sent Events) route example, storing all connection in a list
 global_sse_connections = [];
 
 ws_sse_add_route(ws, '/api/sse', _(connection) -> (
-    // Basic authorization token example
-    if(connection~'request'~'headers':'Authorization' != 'Bearer abcd1234', return(
-        ws_sse_override_response(connection, _(request, response) -> (
-            ws_response_set_status(response, 401);
-            'Invalid token provided\n'
-        ))
-    ));
-    ws_sse_add_header(connection, 'X-Custom', 'hello');
     global_sse_connections += connection
 ));
 

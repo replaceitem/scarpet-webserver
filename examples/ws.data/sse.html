@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SSE</title>
+</head>
+<body>
+    <h1>Server Sent Events</h1>
+    <h2>Block placing log</h2>
+    <div id="event-log">
+    </div>
+    <script>
+        const eventLog = document.getElementById('event-log');
+        const eventSource = new EventSource('/api/sse');
+        eventSource.addEventListener('place', (event) => {
+            const div = document.createElement('div');
+            div.innerText = event.data
+            eventLog.appendChild(div);
+        });
+    </script>
+</body>
+</html>
