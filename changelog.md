@@ -1,1 +1,2 @@
-* Updated to Minecraft 26.1 (Thanks to [#2](https://github.com/replaceitem/scarpet-webserver/pull/2/changes))
+* Added support for Server-sent events (Thanks to [#4](https://github.com/replaceitem/scarpet-webserver/pull/4))
+* Added `ws_get` function (Thanks to [#4](https://github.com/replaceitem/scarpet-webserver/pull/4))
