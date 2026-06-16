@@ -7,6 +7,7 @@ read_file_raw_any(file) -> join('\n',read_file(file,'any'));
 global_root_page = read_file_raw_any('index.html');
 global_player_element = read_file_raw_any('player.html');
 global_404_page = read_file_raw_any('404.html');
+global_sse_page = read_file_raw_any('sse.html');
 global_postreply_template = read_file_raw_any('postreply.html');
 
 
@@ -87,3 +88,24 @@ ws_add_route(ws, 'post', '/postreply', _(request, response) -> (
 
 // Custom 404 page
 ws_not_found(ws, _(request, response) -> global_404_page);
+
+// Page for SSE events
+ws_add_route(ws, 'get', '/sse', _(request, response) -> global_sse_page);
+
+// SSE (Server-Sent Events) route example, storing all connection in a list
+global_sse_connections = [];
+
+ws_sse_add_route(ws, '/api/sse', _(connection) -> (
+    global_sse_connections += connection
+));
+
+// Function for pruning closed connections from the list.
+// Can either be manually called, or run repeatedly using the schedule function.
+prune_closed_connections() -> global_sse_connections = filter(global_sse_connections, !_~'closed');
+
+// Listen for block place events and send messages to all connections
+__on_player_places_block(player, item_tuple, hand, block) -> (
+    n = for(global_sse_connections, ws_sse_send_message(_, 'place', player + ' placed ' + block + ' with their ' + hand));
+    print('sent message to ' + n + ' SSE connections');
+    prune_closed_connections()
+);

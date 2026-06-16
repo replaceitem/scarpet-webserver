@@ -8,10 +8,7 @@ import carpet.script.annotation.SimpleTypeConverter;
 import carpet.script.annotation.ValueCaster;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
-import net.replaceitem.scarpetwebserver.script.Functions;
-import net.replaceitem.scarpetwebserver.script.RequestValue;
-import net.replaceitem.scarpetwebserver.script.ResponseValue;
-import net.replaceitem.scarpetwebserver.script.WebserverValue;
+import net.replaceitem.scarpetwebserver.script.*;
 import net.replaceitem.scarpetwebserver.webserver.Webserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,12 +44,15 @@ public class ScarpetWebserver implements CarpetExtension, ModInitializer {
         ValueCaster.register(WebserverValue.class, "webserver");
         ValueCaster.register(ResponseValue.class, "webserver_response");
         ValueCaster.register(RequestValue.class, "webserver_request");
+        ValueCaster.register(SSEConnectionValue.class, "sse_connection");
         SimpleTypeConverter.registerType(WebserverValue.class, Webserver.class, WebserverValue::getWebserver, "webserver");
         SimpleTypeConverter.registerType(ResponseValue.class, Response.class, ResponseValue::getResponse, "webserver_response");
         SimpleTypeConverter.registerType(RequestValue.class, Request.class, RequestValue::getRequest, "webserver_request");
+        SimpleTypeConverter.registerType(SSEConnectionValue.class, SSEConnection.class, SSEConnectionValue::getConnection, "sse_connection");
         OutputConverter.register(Webserver.class, WebserverValue::new);
         OutputConverter.register(Response.class, ResponseValue::new);
         OutputConverter.register(Request.class, RequestValue::new);
+        OutputConverter.register(SSEConnection.class, SSEConnectionValue::new);
         AnnotationParser.parseFunctionClass(Functions.class);
     }
 

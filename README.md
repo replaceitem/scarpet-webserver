@@ -79,6 +79,24 @@ ws_add_route(ws, 'get', '/requestdump', _(request, response) -> (
 
 // Custom 404 page
 ws_not_found(ws, _(request, response) -> global_404_page);
+
+// SSE (Server-Sent Events) route example, storing all connection in a list
+global_sse_connections = [];
+
+ws_sse_add_route(ws, '/api/sse', _(connection) -> (
+    global_sse_connections += connection
+));
+
+// Function for pruning closed connections from the list.
+// Can either be manually called, or run repeatedly using the schedule function.
+prune_closed_connections() -> global_sse_connections = filter(global_sse_connections, !_~'closed');
+
+// Listen for block place events and send messages to all connections
+__on_player_places_block(player, item_tuple, hand, block) -> (
+    n = for(global_sse_connections, ws_sse_send_message(_, 'place', player + ' placed ' + block + ' with their ' + hand));
+    print('sent message to ' + n + ' SSE connections');
+    prune_closed_connections()
+);
 ```
 
 
@@ -99,6 +117,25 @@ You can also use the [example script](#example-syntax) for testing, which has a 
 The `response` is a [response value](#response).
 
 The value returned by the function will be the response body (in most cases the html page) to be sent.
+
+### SSE (Server-Sent Events) Route callback
+
+The callback function for SSE routes should have this signature:
+
+```js
+_(connection) -> (
+    // access request data with connection~'request',
+    // set response headers with ws_sse_add_header,
+    // save connection for sending messages to with sse_send_message
+    global_connection_list += connection
+)
+```
+
+The `connection` is an [SSE connection value](#sse_connection).
+
+The value returned by the function is ignored and will not be used for anything. If you wish to immediately send data upon connection,
+then [ws_sse_send_message](#ws_sse_send_messagesse_connection-optional-event-data-optional-callback)
+or [ws_sse_override_response](#ws_sse_override_responsesse_connection-callback) can be called inside this callback.
 
 ### Values
 
@@ -204,6 +241,20 @@ Returns the body of the request as a string.
 
 This value is provided in route callbacks, and is used to assign various response data.
 
+#### `sse_connection`
+
+This is a handle for a connection to an SSE endpoint, which used to send messages or close an active connection.
+This can be retrieved using the callback argument of [`ws_sse_add_route`](#ws_sse_add_routewebserver-path-callback).
+
+##### `sse_connection~'request'`
+
+Returns the [request](#request) associated with the SSE connection.
+
+##### `sse_connection~'closed'`
+
+Returns a boolean value indicating whether the SSE connection is currently closed.
+This value will be `true` after [sse_close](#ws_sse_closesse_connection-optional-callback) is called,
+or after a call to [sse_send_message](#ws_sse_send_messagesse_connection-optional-event-data-optional-callback) fails with an EOF exception.
 
 ### Functions
 
@@ -238,3 +289,50 @@ Sets content type for the response.
 #### `ws_response_add_header(response, header, value)`
 
 Adds a response header.
+
+#### `ws_sse_add_route(webserver, path, callback)`
+
+Adds an SSE (Server-Sent Events) route to the `webserver`.
+The callback can be either a string of the name of a previously declared function, or a lambda function.
+See the [SSE route callback](#sse-server-sent-events-route-callback) section for more details.
+The `path` uses jetty's [UriTemplatePathSpec](https://eclipse.dev/jetty/javadoc/jetty-12/org/eclipse/jetty/http/pathmap/UriTemplatePathSpec.html),
+so you can use [its syntax (Level 1)](https://tools.ietf.org/html/rfc6570).
+
+It supports path parameters like `/sse/{room}`, which can then be retrieved using `connection~'request'~'pathParams':'room'`.
+
+#### `ws_sse_override_response(sse_connection, callback)`
+
+Overrides the default behavior of an SSE connection and gain access to its underlying `request` and `response` via the callback argument.
+The callback argument behaves the same as the [route callback](#route-callback) and receives same the `request` and `response` arguments.
+The return value of the callback is used as the response body, and the connection is closed once that data is sent, rather than being kept open like a normal SSE connection.
+The usual [ws_response_set_status](#ws_response_set_statusresponse-statuscode), [ws_response_set_content_type](#ws_response_set_content_typeresponse-contenttype),
+and [ws_response_add_headerresponse](#ws_response_add_headerresponse-header-value) functions will all work as expected inside the callback as well.
+The main purpose of this function is for being able to send back error responses from SSE routes under certain scenarios, like for authorization purposes.
+
+This function will only work inside the callback of `ws_add_sse_route`, since no response has been sent yet at that point.
+If this is called at a later point after the initial SSE response has already been made, this function will do nothing and return the boolean `false`,
+otherwise `true` will be returned to indicate the response was able to be overridden.
+
+#### `ws_sse_add_header(sse_connection, header, value)`
+
+Adds a response header to an SSE connection.
+
+This function will only work if it is called from within the `ws_sse_add_route`, as the response headers are sent after that callback completes.
+If this is called at a later point after the initial SSE response has already been made, this function will do nothing and return the boolean `false`,
+otherwise `true` will be returned to indicate the response header was added.
+
+#### `ws_sse_send_message(sse_connection, optional event, data, optional callback)`
+
+Sends a message to an existing SSE connection handle, given an optional event name and the event data to send.
+
+A callback can optionally be provided, which will be called when either the message is successfully sent, or an error occurs while sending.
+The first argument passed to the callback is the same `sse_connection` that was provided to `ws_sse_send_message`, and the second argument is
+a boolean indicating whether the operation was successful (`true` for success, and `false` for failure).
+
+#### `ws_sse_close(sse_connection, optional callback)`
+
+Closes an existing SSE connection.
+
+A callback can optionally be provided, which will be called when either the connection is successfully closed, or an error occurs while closing.
+The first argument passed to the callback is the same `sse_connection` that was provided to `ws_sse_close`, and the second argument is
+a boolean indicating whether the operation was successful (`true` for success, and `false` for failure).
